@@ -20,6 +20,7 @@ router.post(
   async (req, res) => {
     // Finds the validation errors in this request and wraps them in an object with handy functions
     //if there are errors , return bad request and then the errors
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -48,7 +49,9 @@ router.post(
         },
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ authToken });
+      success = true
+      //return json(user)
+      res.json({ success, authToken });
     } catch (error) {
       //catch errors
       console.error(error.message);
@@ -63,6 +66,7 @@ router.post(
   "/login",
   [body("email").isEmail(), body("password").isLength({ min: 5 }).exists()],
   async (req, res) => {
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -87,7 +91,8 @@ router.post(
         },
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ authToken });
+      success = true;
+      res.json({ success, authToken });
     } catch (error) {
       //catch errors
       console.error(error.message);
@@ -100,7 +105,7 @@ router.post(
 
 router.post("/getuser", fetchuser, async (req, res) => {
   try {
-    userId = req.user.id;
+    let userId = req.user.id;
     const user = await User.findById(userId).select("-password");
     res.send(user);
   } catch (error) {
